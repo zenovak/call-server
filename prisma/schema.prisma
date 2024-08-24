@@ -20,4 +20,19 @@ model Room {
   sdpOffer    String?
   sdpAnswer   String?
   createdAt   DateTime   @default(now())
+  candidates     IceCandidate[]
+}
+
+// IceCandidates for exchange. is grouped by rooms and filter by type.
+model IceCandidate {
+  id          Int       @id @default(autoincrement())
+  roomId      Int
+  candidate   String    
+  type        CandidateType
+  room        Room      @relation(fields: [roomId], references: [id])
+}
+
+enum CandidateType {
+  OFFER
+  ANSWER
 }
