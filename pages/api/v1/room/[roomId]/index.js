@@ -1,4 +1,4 @@
-import prisma from "@utils/server/prisma";
+import prisma, { handlePrismaError } from "@utils/server/prisma";
 
 
 export default async function handler(req, res) {
@@ -28,12 +28,16 @@ export default async function handler(req, res) {
             // room doesnt exist, expects sdpOffer
             const { sdpOffer } = req.body;
 
-            const operation = await prisma.room.create({data: {
-                id: roomId,
-                sdpOffer: sdpOffer
-            }});
-
-            res.status(201).json({operation});
+            try {
+                const operation = await prisma.room.create({data: {
+                    id: roomId,
+                    sdpOffer: sdpOffer
+                }});
+                res.status(201).json({operation});            
+            } catch (error) {
+                const errorRes = handlePrismaError(error);
+                res.status(400).json(errorRes);
+            }
             break;
         }
 
@@ -41,16 +45,20 @@ export default async function handler(req, res) {
             // room exists, expects sdpAnswer
             const { sdpAnswer } = req.body;
 
-            const operation = await prisma.room.update({
-                data: {
-                    sdpAnswer: sdpAnswer
-                },
-                where: {
-                    id: roomId
-                }
-            });
-
-            res.status(201).json({operation});
+            try {
+                const operation = await prisma.room.update({
+                    data: {
+                        sdpAnswer: sdpAnswer
+                    },
+                    where: {
+                        id: roomId
+                    }
+                });
+                res.status(201).json({operation});
+            } catch (error) {
+                const errorRes = handlePrismaError(error);
+                res.status(400).json(errorRes);
+            }
             break;
         }
         default:

@@ -1,4 +1,4 @@
-const API_ENDPOINT = "/api/v1/room"
+const API_ENDPOINT = "/api/v1/room/"
 
 /**
  * async query a room for SDP offer and answers. 
@@ -9,7 +9,7 @@ const API_ENDPOINT = "/api/v1/room"
  */
 export async function getRoom(roomId, onSuccess=undefined, onError=undefined) {
     try {
-        const response = await fetch(`${API_ENDPOINT}?roomId=${roomId}`);
+        const response = await fetch(`${API_ENDPOINT}${roomId}`);
 
         if (!response.ok) {
             throw new Error(`Response status: ${response.status}. ${response.message}`);
@@ -35,7 +35,7 @@ export async function getRoom(roomId, onSuccess=undefined, onError=undefined) {
  */
 export async function createRoomAndSendOffer(roomId, sdpOffer,  onSuccess=undefined, onError=undefined) {
     try {
-        const response = await fetch(`${API_ENDPOINT}?roomId=${roomId}`, {
+        const response = await fetch(`${API_ENDPOINT}${roomId}`, {
             method: "POST",
             body: {sdpOffer: sdpOffer}
         });
@@ -64,7 +64,7 @@ export async function createRoomAndSendOffer(roomId, sdpOffer,  onSuccess=undefi
  */
 export async function sendRoomAnswer(roomId, sdpAnswer, onSuccess=undefined, onError=undefined) {
     try {
-        const response = await fetch(`${API_ENDPOINT}?roomId=${roomId}`, {
+        const response = await fetch(`${API_ENDPOINT}${roomId}`, {
             method: "PUT",
             body: {sdpAnswer: sdpAnswer}
         });
@@ -77,4 +77,9 @@ export async function sendRoomAnswer(roomId, sdpAnswer, onSuccess=undefined, onE
         onError && onError();
         return null
     }
+}
+
+
+export function useRoom(roomId) {
+
 }
