@@ -69,6 +69,10 @@ export async function sendRoomAnswer(roomId, sdpAnswer, onSuccess=undefined, onE
             body: {sdpAnswer: sdpAnswer}
         });
 
+        if (!response.ok) {
+            throw new Error(`Response status: ${response.status}. ${response.message}`);
+        }
+
         const data = await response.json();
         onSuccess && onSuccess(data);
         return data;
