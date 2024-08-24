@@ -47,7 +47,7 @@ export async function addOfferCandidate(roomId, offerCandidate, onSuccess, onErr
     try {
         const response = await fetch(getOfferEndpoint(roomId), {
             method: "POST",
-            body: { offerCandidate: offerCandidate}
+            body: JSON.stringify({ offerCandidate: offerCandidate})
         });
 
         if (!response.ok) {
@@ -101,7 +101,7 @@ export async function addAnswerCandidate(roomId, answerCandidate, onSuccess, onE
     try {
         const response = await fetch(getAnswerEndpoint(roomId), {
             method: "POST",
-            body: { answerCandidate: answerCandidate}
+            body: JSON.stringify({ answerCandidate: answerCandidate})
         });
 
         if (!response.ok) {

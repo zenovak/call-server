@@ -26,12 +26,12 @@ export default async function handler(req, res) {
 
         case "POST": {
             // room doesnt exist, expects sdpOffer
-            const { sdpOffer } = req.body;
-
+            const { sdpOffer } = JSON.parse(req.body);
+            console.log(sdpOffer);
             try {
                 const operation = await prisma.room.create({data: {
                     id: roomId,
-                    sdpOffer: sdpOffer
+                    sdpOffer: JSON.stringify(sdpOffer)
                 }});
                 res.status(201).json(operation);            
             } catch (error) {
@@ -43,12 +43,12 @@ export default async function handler(req, res) {
 
         case "PUT": {
             // room exists, expects sdpAnswer
-            const { sdpAnswer } = req.body;
+            const { sdpAnswer } = JSON.parse(req.body);
 
             try {
                 const operation = await prisma.room.update({
                     data: {
-                        sdpAnswer: sdpAnswer
+                        sdpAnswer: JSON.stringify(sdpAnswer)
                     },
                     where: {
                         id: roomId

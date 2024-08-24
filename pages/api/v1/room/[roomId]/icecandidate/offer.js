@@ -20,7 +20,7 @@ export default async function handler(req, res) {
             break;
         }   
         case "POST": {
-            const { offerCandidate } = req.body;
+            const { offerCandidate } = JSON.parse(req.body);
             if (!offerCandidate) {
                 res.status(400).json({message: "Error. Missing required field. offerCandidiate in payload"});
             }

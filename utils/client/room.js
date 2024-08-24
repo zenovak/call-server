@@ -37,7 +37,7 @@ export async function createRoomAndSendOffer(roomId, sdpOffer,  onSuccess=undefi
     try {
         const response = await fetch(`${API_ENDPOINT}${roomId}`, {
             method: "POST",
-            body: {sdpOffer: sdpOffer}
+            body: JSON.stringify({sdpOffer: sdpOffer})
         });
 
         if (!response.ok) {
@@ -66,7 +66,7 @@ export async function sendRoomAnswer(roomId, sdpAnswer, onSuccess=undefined, onE
     try {
         const response = await fetch(`${API_ENDPOINT}${roomId}`, {
             method: "PUT",
-            body: {sdpAnswer: sdpAnswer}
+            body: JSON.stringify({sdpAnswer: sdpAnswer})
         });
 
         if (!response.ok) {
