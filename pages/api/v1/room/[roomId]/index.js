@@ -20,7 +20,7 @@ export default async function handler(req, res) {
                 res.status(404).json({message: "Room not found. Most likely not created"});
             }
 
-            res.status(200).json({operation});
+            res.status(200).json(operation);
             break;
         }
 
@@ -33,7 +33,7 @@ export default async function handler(req, res) {
                     id: roomId,
                     sdpOffer: sdpOffer
                 }});
-                res.status(201).json({operation});            
+                res.status(201).json(operation);            
             } catch (error) {
                 const errorRes = handlePrismaError(error);
                 res.status(400).json(errorRes);
@@ -54,7 +54,7 @@ export default async function handler(req, res) {
                         id: roomId
                     }
                 });
-                res.status(201).json({operation});
+                res.status(201).json(operation);
             } catch (error) {
                 const errorRes = handlePrismaError(error);
                 res.status(400).json(errorRes);
