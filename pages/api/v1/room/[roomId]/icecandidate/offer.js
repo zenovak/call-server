@@ -12,7 +12,7 @@ export default async function handler(req, res) {
                     type: "OFFER"
                 }})
 
-                res.status(200).json({offerCandidates: response});
+                res.status(200).json({offerCandidate: response});
             } catch (error) {
                 const errorRes = handlePrismaError(error);
                 res.status(400).json(errorRes);

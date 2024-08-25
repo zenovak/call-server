@@ -1,3 +1,5 @@
+import { useState } from "react";
+import useSWR from "swr";
 
 
 const getOfferEndpoint = (roomId) => {
@@ -5,7 +7,7 @@ const getOfferEndpoint = (roomId) => {
 }
 
 const getAnswerEndpoint = (roomId) => {
-    return `/api/v1/${roomId}/icecandidate/answer`
+    return `/api/v1/room/${roomId}/icecandidate/answer`
 }
 
 
@@ -117,4 +119,64 @@ export async function addAnswerCandidate(roomId, answerCandidate, onSuccess, onE
         onError && onError();
         return null
     }
+}
+
+/**
+ * Hook for swr fetching of remote ice candidates. 
+ * @param {*} roomId. int the roomId
+ * @param {*} candidateType remote type for fetched. once set, swr will start listening on intervals\
+ * valid values are: "ANSWER", "OFFER"
+ * @returns 
+ */
+export function useICECandidates(roomId, candidateType, onicecandidate) {
+    const fetcher = (url) => fetch(url).then((res)=> res.json());
+
+    let candidateBackend = null;
+    switch (candidateType) {
+        case "ANSWER":
+            candidateBackend = getAnswerEndpoint(roomId);
+            break;
+        case "OFFER":
+            candidateBackend = getOfferEndpoint(roomId);
+            break;
+        default:
+            break;
+    }
+
+    const { data, error, isLoading } = useSWR(roomId ? candidateBackend : null, fetcher, {refreshInterval: 3000});
+    // Optimization needed. Stops firing onicecandidate event when fetched candidate lists remains unchanged;
+
+    let candidatesList = [];
+    switch (candidateType) {
+        case "ANSWER":{
+            data && data.answerCandidate.map((item)=>{
+                item && candidatesList.push(
+                    JSON.parse(item.candidate)
+                );
+            });
+            break;
+        }
+
+        case "OFFER": {
+            data && data.offerCandidate.map((item)=>{
+                item && candidatesList.push(
+                    JSON.parse(item.candidate)
+                );
+            })
+            break;
+        }
+    
+        default:
+            break;
+    }
+
+    if (candidatesList.length > 0) {
+        for (let index = 0; index < candidatesList.length; index++) {
+            const currentCandidate = candidatesList[index];
+
+            onicecandidate(currentCandidate);
+        }
+    }
+
+    return {data, candidatesList, error, isLoading}
 }

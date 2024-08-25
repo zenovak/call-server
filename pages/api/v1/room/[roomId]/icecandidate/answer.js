@@ -10,7 +10,7 @@ export default async function handler(req, res) {
                 const response = await prisma.iceCandidate.findMany({where: {
                     roomId: roomId,
                     type: "ANSWER"
-                }})
+                }});
 
                 res.status(200).json({answerCandidate: response});
             } catch (error) {
