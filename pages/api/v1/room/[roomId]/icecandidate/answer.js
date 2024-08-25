@@ -29,7 +29,7 @@ export default async function handler(req, res) {
                 const response = await prisma.iceCandidate.create({data: {
                     roomId: roomId,
                     type: "ANSWER",
-                    candidate: answerCandidate
+                    candidate: JSON.stringify(answerCandidate)
                 }});
 
                 res.status(201).json({answerCandidate: response});
