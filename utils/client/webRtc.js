@@ -1,0 +1,65 @@
+import { useICECandidates } from "./iceCandidate";
+import { useRoom } from "./room";
+
+const { useEffect, useState } = require("react");
+
+
+const ice_servers = [
+    'stun:stun1.l.google.com:19302', 
+    'stun:stun2.l.google.com:19302'
+];
+
+const rtcConfig = {
+    iceServers: [
+        {
+            urls: ice_servers,
+        },
+    ],
+    iceCandidatePoolSize: 10,
+    configuration: {
+        offerToReceiveAudio: true,
+        offerToReceiveVideo: true
+    },
+};
+
+
+
+
+function createRTCInstance() {
+    const peerConnection = new RTCPeerConnection(rtcConfig);
+    peerConnection.ontrack = (event) => {
+        event.streams[0].getTracks().forEach((track) => {
+            remoteStream.addTrack(track);
+        });
+    };
+}
+
+
+
+
+export function useRTCPeerConnection() {
+    const [peerConnection, setPeerConnection] = useState(null);
+
+    function addRemoteTrackToVideo(id) {
+        const remoteStream = document.getElementById(id);
+
+        peerConnection.ontrack = (event) => {
+            event.streams[0].getTracks().forEach((track) => {
+                remoteStream.addTrack(track);
+            });
+        };
+    }
+
+    useEffect(()=>{
+        const peerConnection = new RTCPeerConnection(rtcConfig);
+        setPeerConnection(peerConnection);
+    }, [])
+
+    return {peerConnection, addRemoteTrackToVideo };
+}
+
+
+export function useRTCSignalling(roomId, listeningType, onSDPReceived, onICECandidateReceived) {
+    const { isLoading, error } = useRoom(roomId, listeningType, onSDPReceived);
+    const {data} = useICECandidates(roomId, listeningType, onICECandidateReceived);
+}

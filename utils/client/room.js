@@ -1,3 +1,6 @@
+import { useState } from "react";
+import useSWR from "swr";
+
 const API_ENDPOINT = "/api/v1/room/"
 
 /**
@@ -83,7 +86,36 @@ export async function sendRoomAnswer(roomId, sdpAnswer, onSuccess=undefined, onE
     }
 }
 
+/**
+ * 
+ * @param {*} roomId 
+ * @param {*} listenType listen for either "OFFER" or "ANSWER" sdp document
+ * @param {*} listener callback function. fired when a desired sdp doc is found
+ */
+export function useRoom(roomId=null, listenType, listener) {
+    // fetch offer/answer via swr
+    const fetcher = (url) => fetch(url).then((res)=> res.json());
+    const { data, error, isLoading } = useSWR(roomId ? `${API_ENDPOINT}${roomId}` : null, fetcher, {refreshInterval: 3000});
 
-export function useRoom(roomId) {
 
+    let sdp = null;
+    switch (listenType) {
+        case "OFFER": {
+            sdp = JSON.parse(data.sdpOffer);
+            break;
+        }
+        case "ANSWER": {
+            sdp = JSON.parse(data.sdpAnswer);
+            break;
+        }
+        default:
+            break;
+    }
+
+    if (sdp) {
+        listener && listener(sdp);
+        console.log(`swr: ${JSON.stringify(sdp)}`);
+    }
+
+    return {data, error, isLoading}
 }
