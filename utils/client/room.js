@@ -95,17 +95,17 @@ export async function sendRoomAnswer(roomId, sdpAnswer, onSuccess=undefined, onE
 export function useRoom(roomId=null, listenType, listener) {
     // fetch offer/answer via swr
     const fetcher = (url) => fetch(url).then((res)=> res.json());
-    const { data, error, isLoading } = useSWR(roomId ? `${API_ENDPOINT}${roomId}` : null, fetcher, {refreshInterval: 3000});
+    const { data, error, isLoading } = useSWR(listenType ? `${API_ENDPOINT}${roomId}` : null, fetcher, {refreshInterval: 3000});
 
 
     let sdp = null;
     switch (listenType) {
         case "OFFER": {
-            sdp = JSON.parse(data.sdpOffer);
+            sdp = data && JSON.parse(data.sdpOffer);
             break;
         }
         case "ANSWER": {
-            sdp = JSON.parse(data.sdpAnswer);
+            sdp = data && JSON.parse(data.sdpAnswer);
             break;
         }
         default:

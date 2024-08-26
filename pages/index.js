@@ -63,6 +63,7 @@ export default function Home() {
       event.candidate && addAnswerCandidate(testRoom, event.candidate.toJSON());
     };
 
+    const sdpAnswer = await peerConnection.createAnswer();
     await sendRoomAnswer(testRoom, sdpAnswer);
     await peerConnection.setLocalDescription(sdpRemoteOffer);
   }
@@ -72,7 +73,7 @@ export default function Home() {
     <div className="py-24 mx-auto max-w-7xl">
       <div className=" flex gap-8 items-center justify-center mb-8">
         {/* Optionally should also set local vid to muted here */}
-        <video id="localView" autoPlay={true} playsInline className="bg-black"/> 
+        <video id="localView" autoPlay={true} playsInline muted className="bg-black"/> 
         <video id="remoteView" autoPlay={true} playsInline className="bg-black"/>
       </div>
 
