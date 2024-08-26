@@ -1,6 +1,3 @@
-import { useICECandidates } from "./iceCandidate";
-import { useRoom } from "./room";
-
 const { useEffect, useState } = require("react");
 
 
@@ -21,20 +18,6 @@ const rtcConfig = {
         offerToReceiveVideo: true
     },
 };
-
-
-
-
-function createRTCInstance() {
-    const peerConnection = new RTCPeerConnection(rtcConfig);
-    peerConnection.ontrack = (event) => {
-        event.streams[0].getTracks().forEach((track) => {
-            remoteStream.addTrack(track);
-        });
-    };
-}
-
-
 
 
 export function useRTCPeerConnection() {
@@ -61,7 +44,3 @@ export function useRTCPeerConnection() {
 }
 
 
-export function useRTCSignalling(roomId, listeningType, onSDPReceived, onICECandidateReceived) {
-    const { isLoading, error } = useRoom(roomId, listeningType, onSDPReceived);
-    const {data} = useICECandidates(roomId, listeningType, onICECandidateReceived);
-}

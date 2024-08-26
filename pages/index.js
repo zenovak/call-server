@@ -13,15 +13,13 @@ export default function Home() {
   const [listenType, setListenType] = useState(null);
   const [startListeningSDPAnswer, setStartListeningSDPAnswer] = useState(false);
 
-  const { data } = useSDPAnswer(
-    testRoom, 
-    startListeningSDPAnswer,
-    async (sdp) => {
-      peerConnection && await peerConnection.setRemoteDescription(sdp);
-    }
-  );
+  // Signalling server polling services. 
+  useSDPAnswer(testRoom, startListeningSDPAnswer, async (sdp) => {
+    // listens for remote answers
+    peerConnection && await peerConnection.setRemoteDescription(sdp);
+  });
 
-  const { isLoading } = useICECandidates(6, listenType, (iceCandidate)=>{
+  useICECandidates(testRoom, listenType, (iceCandidate) => {
     console.log(iceCandidate);
     peerConnection && peerConnection.addIceCandidate(iceCandidate);
   });
@@ -53,11 +51,11 @@ export default function Home() {
     await peerConnection.setLocalDescription(sdpOffer);
 
     setListenType("ANSWER");
-    setStartListeningSDPAnswer(true);
+    setStartListeningSDPAnswer(true); // Listen for answers
   }
 
+
   async function answerCall() {
-    const sdpRemoteOffer = await getRoom(testRoom);
     setListenType("OFFER");
 
     peerConnection.onicecandidate = (event)=> {
@@ -70,7 +68,7 @@ export default function Home() {
 
     const sdpAnswer = await peerConnection.createAnswer();
     await sendRoomAnswer(testRoom, sdpAnswer);
-    await peerConnection.setLocalDescription(sdpRemoteOffer);
+    await peerConnection.setLocalDescription(sdpAnswer);
   }
 
 
