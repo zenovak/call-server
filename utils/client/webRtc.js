@@ -41,13 +41,15 @@ export function useRTCPeerConnection() {
     const [peerConnection, setPeerConnection] = useState(null);
 
     function addRemoteTrackToVideo(id) {
-        const remoteStream = document.getElementById(id);
+        const remoteVideo = document.getElementById(id);
+        const remoteStream = new MediaStream();
 
         peerConnection.ontrack = (event) => {
             event.streams[0].getTracks().forEach((track) => {
                 remoteStream.addTrack(track);
             });
         };
+        remoteVideo.srcObject = remoteStream;
     }
 
     useEffect(()=>{
