@@ -156,7 +156,19 @@ export function useRoom(roomId=null, listenType, listener) {
  * @returns 
  */
 export function useSDPAnswer(roomId=null, startLisening, onSDPAnswerReceived) {
-    const fetcher = (url) => fetch(url).then((res)=> res.json());
+    const fetcher = (url) => fetch(url)
+        .then( async (res)=> {
+            if (!res.ok) {
+                const error =  new Error("Fetching SDPAnswer failed");
+                error.status = res.status;
+                error.info = res.message;
+
+                throw error;
+            }
+
+            return res.json();
+        });
+        
     const { data, error, isLoading } = useSWR(startLisening ? `${API_ENDPOINT}${roomId}` : null, fetcher, {refreshInterval: 3000});
 
     let sdp = data && JSON.parse(data.sdpAnswer);

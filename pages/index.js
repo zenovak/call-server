@@ -15,6 +15,7 @@ export default function Home() {
 
   const { data } = useSDPAnswer(
     testRoom, 
+    startListeningSDPAnswer,
     async (sdp) => {
       peerConnection && await peerConnection.setRemoteDescription(sdp);
     }
