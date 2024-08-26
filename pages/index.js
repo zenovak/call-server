@@ -1,5 +1,5 @@
 import { addAnswerCandidate, addOfferCandidate, getAnswerCandidate, getOfferCandidates, useICECandidates } from "@utils/client/iceCandidate";
-import { createRoomAndSendOffer, getRoom, sendRoomAnswer, useRoom } from "@utils/client/room";
+import { createRoomAndSendOffer, getRoom, getRoomOffer, sendRoomAnswer, useRoom, useSDPAnswer } from "@utils/client/room";
 import { useRTCPeerConnection } from "@utils/client/webRtc";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -11,12 +11,12 @@ export default function Home() {
   const { peerConnection, addRemoteTrackToVideo } = useRTCPeerConnection();
 
   const [listenType, setListenType] = useState(null);
+  const [startListeningSDPAnswer, setStartListeningSDPAnswer] = useState(false);
 
-  const { data } = useRoom(
+  const { data } = useSDPAnswer(
     testRoom, 
-    listenType, 
-    (sdp)=> {
-      peerConnection && peerConnection.setRemoteDescription(sdp);
+    async (sdp) => {
+      peerConnection && await peerConnection.setRemoteDescription(sdp);
     }
   );
 
@@ -52,6 +52,7 @@ export default function Home() {
     await peerConnection.setLocalDescription(sdpOffer);
 
     setListenType("ANSWER");
+    setStartListeningSDPAnswer(true);
   }
 
   async function answerCall() {
@@ -62,6 +63,9 @@ export default function Home() {
       // must register ice candidate event BEFORE setting local desciption
       event.candidate && addAnswerCandidate(testRoom, event.candidate.toJSON());
     };
+
+    const sdpOffer = await getRoomOffer(testRoom);
+    await peerConnection.setRemoteDescription(sdpOffer);
 
     const sdpAnswer = await peerConnection.createAnswer();
     await sendRoomAnswer(testRoom, sdpAnswer);

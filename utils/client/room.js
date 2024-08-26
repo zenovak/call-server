@@ -86,6 +86,34 @@ export async function sendRoomAnswer(roomId, sdpAnswer, onSuccess=undefined, onE
     }
 }
 
+
+/**
+ * 
+ * @param {*} roomId 
+ * @param {*} onSuccess 
+ * @param {*} onError 
+ * @returns sdpOffer. A parsed SDP document in JSON format
+ */
+export async function getRoomOffer(roomId, onSuccess=undefined, onError=undefined) {
+    try {
+        const response = await fetch(`${API_ENDPOINT}${roomId}`);
+
+        if (!response.ok) {
+            throw new Error(`Response status: ${response.status}. ${response.message}`);
+        }
+
+        const data = await response.json();
+        onSuccess && onSuccess(data.sdpOffer);
+        return JSON.parse(data.sdpOffer);
+
+    } catch (error) {
+        console.log(error.message);
+        onError && onError();
+        return null;
+    }
+}
+
+
 /**
  * 
  * @param {*} roomId 
@@ -116,6 +144,25 @@ export function useRoom(roomId=null, listenType, listener) {
         listener && listener(sdp);
         console.log(`swr: ${JSON.stringify(sdp)}`);
     }
+
+    return {data, error, isLoading}
+}
+
+/**
+ * Singular purpose. Will start listening for sdpAnswer once startListening state is set to true
+ * @param {*} roomId 
+ * @param {*} startLisening 
+ * @param {*} onSDPAnswerReceived 
+ * @returns 
+ */
+export function useSDPAnswer(roomId=null, startLisening, onSDPAnswerReceived) {
+    const fetcher = (url) => fetch(url).then((res)=> res.json());
+    const { data, error, isLoading } = useSWR(startLisening ? `${API_ENDPOINT}${roomId}` : null, fetcher, {refreshInterval: 3000});
+
+    let sdp = data && JSON.parse(data.sdpAnswer);
+
+    sdp && onSDPAnswerReceived(sdp);
+    console.log(`swr useSDPAnswer: ${JSON.stringify(sdp)}`);
 
     return {data, error, isLoading}
 }
