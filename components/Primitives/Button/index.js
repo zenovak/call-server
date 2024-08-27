@@ -6,6 +6,5 @@
 
 **/
 
-export * from "@components/Primitives/Button/Button";
-export * from "@components/Primitives/Button/ButtonGroup";
 export * from "@components/Primitives/Button/IconButton";
+export * from "@components/Primitives/Button/Button2.js";
