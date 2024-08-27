@@ -19,10 +19,12 @@ export default function Home() {
     peerConnection && await peerConnection.setRemoteDescription(sdp);
   });
 
+  // listens for ice candidites.
   useICECandidates(testRoom, listenType, (iceCandidate) => {
     console.log(iceCandidate);
     peerConnection && peerConnection.addIceCandidate(iceCandidate);
   });
+  
   
   async function activateCameras() {
     const stream = await navigator.mediaDevices.getUserMedia({video: false, audio: true});
@@ -51,7 +53,7 @@ export default function Home() {
     await peerConnection.setLocalDescription(sdpOffer);
 
     setListenType("ANSWER");
-    setStartListeningSDPAnswer(true); // Listen for answers
+    setStartListeningSDPAnswer(true); 
   }
 
 
