@@ -1,19 +1,95 @@
+import { useEffect, useState } from "react";
 
 /**
  * A media hook for getting the user cameras and mic.\
- * mediaStream: the mediaStream object. Example usage: \
- * `<video srcObject={mediaStream} />`\
- * activateStream: retrieves the mediaStream.\
- * ({video: false, audio: true}) => {void}
+ * mediaStream: the mediaStream object. 
+ * 
+ * @example
+ * ```jsx
+ * const {
+ *      userMedia,         // the currently in use user's video/audio feed. Example: {video:false, audio:true}
+ *      supportedDevices,  // capture devices available. example: {video: true, audio:true}
+ *      localStream,       // the MediaStream object from the user's feed.
+ *      toggleMic,         // turns mic on or off
+ *      toggleVideo        // turns video on or off
+ * } = useMedia();
+ * 
+ * function handleClick() {
+ *     toggleMic();
+ * }
+ * //... your video component should use localStream like so...
+ * <video src={localStream} autoplay playsinline/>
+ * ```
  * @returns 
  */
 export function useMedia() {
-    const [mediaStream, setMediaStream] = useState(null);
+    const [userMedia, setUserMedia] = useState({ video: false, audio: false });
+    const [supportedDevices, setSupportedDevices] = useState(null);
+    const [previousToggle, setPreviousToggle] = useState();
+    const [localStream, setLocalStream] = useState(null);
 
-    const activateStream = async (config) => {
-        const stream = await navigator.mediaDevices.getUserMedia(config);
-        setMediaStream(stream);
+    function toggleCamera() {
+        if (!supportedDevices.video) {
+            return;
+        }
+
+        setPreviousToggle(userMedia);
+        setUserMedia({
+            video: !userMedia.video,
+            audio: userMedia.audio
+        });
+        
+
     }
-    return {mediaStream, activateStream}
+
+    function toggleMic() {
+        if (!supportedDevices.audio) {
+            return;
+        }
+        setPreviousToggle(userMedia);
+        setUserMedia({
+            video: userMedia.video,
+            audio: !userMedia.audio
+        });
+    }
+
+    // update Device stream obj when toggle
+    useEffect(() => {
+        if (!userMedia.audio && !userMedia.video) {
+            setLocalStream(new MediaStream());
+            return;
+        }
+
+        navigator.mediaDevices
+            .getUserMedia(userMedia)
+            .then(
+                (stream) => {
+                    setLocalStream(stream)
+                },
+                (error) => {
+                    console.log(error);
+                    setUserMedia(previousToggle); // revert
+                }
+            );
+    }, [userMedia]);
+
+
+
+    // Check for supported devices
+    useEffect(() => {
+        const devices = navigator.mediaDevices.enumerateDevices()
+            .then((devices) => {
+                devices.forEach((device) => {
+                    if (device.kind == "videoinput") {
+                        setSupportedDevices({ video: true, ...supportedDevices });
+                    }
+                    if (device.kind == "audioinput") {
+                        setSupportedDevices({ audio: true, ...supportedDevices });
+                    }
+                })
+            });
+    }, []);
+
+    return { localStream, userMedia, supportedDevices, toggleCamera, toggleMic }
 }
 

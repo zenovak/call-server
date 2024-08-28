@@ -14,12 +14,16 @@ export const ContainerPX = ({children}) => {
 
 /**
  * A padded container of equal sides. This is often used to construct the nav bar 
+ * @param {className} className CSS classname
+ * @param {override} override. Boolean. Whether the className properties overwrites the default or apend instead
  * @param {children} children the content
  * @returns 
  */
-export const ContainerP = ({children}) => {
+export const ContainerP = ({className,  override, children, ...props}) => {
     return (
-        <div className="max-w-constant mx-auto p-6">
+        <div 
+            className={override? className: "max-w-constant mx-auto p-6 " + className }
+            {...props}>
             {children}
         </div>
   );
