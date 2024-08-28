@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
  * A media hook for getting the user cameras and mic.\
  * mediaStream: the mediaStream object. 
  * 
+ * @param {hardToggle} hardToggle. bool. Whether to completely renew a mediaStream when toggle is triggered.
+ * 
  * @example
  * ```jsx
  * const {
@@ -22,17 +24,17 @@ import { useEffect, useState } from "react";
  * ```
  * @returns 
  */
-export function useMedia() {
+export function useMedia(hardToggle) {
     const [userMedia, setUserMedia] = useState({ video: false, audio: false });
     const [supportedDevices, setSupportedDevices] = useState({video:false, audio: false});
     const [previousToggle, setPreviousToggle] = useState({video: false, audio: false});
+    const [firstToggle, setFirstToggle] = useState({video: true, audio: true});
     const [localStream, setLocalStream] = useState(null);
 
     function toggleCamera() {
         if (!supportedDevices.video) {
             return;
         }
-
         setPreviousToggle(userMedia);
         setUserMedia({
             video: !userMedia.video,
@@ -53,6 +55,42 @@ export function useMedia() {
 
     // update Device stream obj when toggle
     useEffect(() => {
+        if (hardToggle) {
+            useHardToggle();
+        } else {
+            useSoftToggle();
+        }
+
+    }, [userMedia]);
+
+    // toggles camera/mic on or off without stopping the tracks
+    function useSoftToggle() {
+        if (firstToggle.video && userMedia.video) {
+            setFirstToggle({video: false, audio: firstToggle.audio});
+            toggleMedia(userMedia, previousToggle);
+            console.log("Enabling video for fisrt time");
+
+        }
+        if (firstToggle.audio && userMedia.audio) {
+            setFirstToggle({video: firstToggle.video, audio:false});
+            toggleMedia(userMedia, previousToggle);
+            console.log("Enabling audio for fisrt time");
+
+        }
+
+        if (!localStream) {
+            return;
+        }
+        if (localStream.getAudioTracks()[0]) {
+            localStream.getAudioTracks()[0].enabled = userMedia.audio;
+        } 
+        if (localStream.getVideoTracks()[0]) {
+            localStream.getVideoTracks()[0].enabled = userMedia.video;
+        }
+    }
+
+    // stopping the tracks and resetting when camera/mic turns on or off
+    function useHardToggle() {
         if (!useMedia.video && previousToggle.video) {
             // was toggled on previously now off. so stop video tracks
             localStream.getVideoTracks()[0].stop();
@@ -67,18 +105,22 @@ export function useMedia() {
             return;
         }
 
+        toggleMedia(userMedia, previousToggle);
+    }
+
+    function toggleMedia(userMediaSettings, revertSettings) {
         navigator.mediaDevices
-            .getUserMedia(userMedia)
+            .getUserMedia(userMediaSettings)
             .then(
                 (stream) => {
                     setLocalStream(stream)
                 },
                 (error) => {
                     console.log(error);
-                    setUserMedia(previousToggle); // revert
+                    setUserMedia(revertSettings); // revert
                 }
             );
-    }, [userMedia]);
+    }
 
 
 
