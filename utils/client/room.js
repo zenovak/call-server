@@ -172,9 +172,7 @@ export function useSDPAnswer(roomId=null, startLisening, onSDPAnswerReceived) {
     const { data, error, isLoading } = useSWR(startLisening ? `${API_ENDPOINT}${roomId}` : null, fetcher, {refreshInterval: 3000});
 
     let sdp = data && JSON.parse(data.sdpAnswer);
-
     sdp && onSDPAnswerReceived(sdp);
-    console.log(`swr useSDPAnswer: ${JSON.stringify(sdp)}`);
-
+    
     return {data, error, isLoading}
 }

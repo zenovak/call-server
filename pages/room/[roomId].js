@@ -14,12 +14,13 @@ export default function Room() {
   const router = useRouter();
   const roomId = router.query.roomId;
   const type = router.query.type;
+  const [iceListeningType, setIceListeningType] = useState(null);
   const { localStream, userMedia, toggleCamera, toggleMic} = useMedia();
   const { peerConnection, addRemoteTrackToVideo } = useRTCPeerConnection();
   const [ startListeningSDPAnswer, setStartListeningSDPAnswer] = useState(false);
   
   // ----------------------- Signalling events -------------------------------
-  useICECandidates(roomId, type, (iceCandiate)=>{
+  useICECandidates(roomId, iceListeningType, (iceCandiate)=>{
     peerConnection && peerConnection.addIceCandidate(iceCandiate);
   });
 
@@ -62,12 +63,10 @@ export default function Room() {
 
     await peerConnection.setLocalDescription(sdpOffer);
     setStartListeningSDPAnswer(true);
+    setIceListeningType("ANSWER");
   }
 
   async function AnswerSenderReady() {
-    if(!userMedia()) {
-
-    }
     const sdpOffer = await getRoomOffer(roomId);
 
     peerConnection.onicecandidate = (event)=> {
@@ -80,23 +79,26 @@ export default function Room() {
     const sdpAnswer = await peerConnection.createAnswer();
     await sendRoomAnswer(roomId, sdpAnswer);
     await peerConnection.setLocalDescription(sdpAnswer);
+    setIceListeningType("ANSWER");
   }
 
   function userMediaOn() {
     return userMedia.video || userMedia.audio;
   }
 
-  function onReadyClick() {
+  async function onReadyClick() {
+    console.log("answer side called");
+
     if (!userMediaOn()) {
       toast.error("Make sure mic or video is On");
       return;
     }
     if (type == "offer") {
-      OfferIntiatorReady();
+      await OfferIntiatorReady();
       return;
     }
     if (type == "answer") {
-      AnswerSenderReady();
+      await AnswerSenderReady();
       return;
     }
   }

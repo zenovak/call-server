@@ -91,7 +91,7 @@ export default function Call() {
                 <div className="md:flex space-y-4 md:space-y-0 gap-8 items-center">
                     <Button2 
                         onClick={createRoom}
-                        className="bg-slate-600 text-gray-100 hover:bg-slate-500 hover:-translate-y-1 transition-transform hover:shadow">
+                        className="bg-slate-600 text-gray-100 sm:hover:bg-slate-500 sm:hover:-translate-y-1 transition-transform hover:shadow">
                         New room
                     </Button2>
                     <form onSubmit={handleSubmit(joinRoom)} className="flex gap-4 items-center">
