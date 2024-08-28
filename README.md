@@ -41,23 +41,21 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 
 
 
+<br><br>
 
-
----
 ## Progress Report
 
 
-### Video Audio issue
-
+### Video Audio issue. Toggle are hard constraints during initial calls
 If offer side does not offer video. Offer side will not receive answer side video
 despite answer side toggles video on.
 
 1. This is a unidirection issue. To fix will require using tranceiver API
+2. If Offer side later decides to transmit video. Current `softToggle` mechanism will not work, and requires renegotiations.
 
+<br>
 
-
-
-### Mic/Video toggle issues
+### Mic/Video toggle issue 1: inconsistent toggle behavior
 
 Mic turns off on offer side...
 ```
@@ -77,7 +75,16 @@ Answer side:
 - turns off mic
 ```
 
-Mic retoggle issues
+UPDATE:\
+Situation refined. Happens on Mobile device using `softToggle`. When user on 
+mobile turns off mic, peer can still hear, but toggling off video works as expected
+
+<br>
+
+### ~~Mic retoggle issues 2: Call disconnects when toggle~~
+**solved via using soft toggle mechanism instead.**
+
+
 ```
 Offer side:
 - turn off mic
@@ -88,6 +95,7 @@ Answer side:
 
 Offer side retoggles:
 - answer cannot hear. Unexpected behavior.
+- call seems to be disconnected
 ```
 
 

@@ -69,22 +69,20 @@ export function useMedia(hardToggle) {
             setFirstToggle({video: false, audio: firstToggle.audio});
             toggleMedia(userMedia, previousToggle);
             console.log("Enabling video for fisrt time");
-
         }
         if (firstToggle.audio && userMedia.audio) {
             setFirstToggle({video: firstToggle.video, audio:false});
             toggleMedia(userMedia, previousToggle);
             console.log("Enabling audio for fisrt time");
-
         }
 
         if (!localStream) {
             return;
         }
-        if (localStream.getAudioTracks()[0]) {
+        if (!firstToggle.audio && localStream.getAudioTracks()[0]) {
             localStream.getAudioTracks()[0].enabled = userMedia.audio;
         } 
-        if (localStream.getVideoTracks()[0]) {
+        if (!firstToggle.video && localStream.getVideoTracks()[0]) {
             localStream.getVideoTracks()[0].enabled = userMedia.video;
         }
     }
