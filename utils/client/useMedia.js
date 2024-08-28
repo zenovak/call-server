@@ -24,11 +24,12 @@ import { useEffect, useState } from "react";
  */
 export function useMedia() {
     const [userMedia, setUserMedia] = useState({ video: false, audio: false });
-    const [supportedDevices, setSupportedDevices] = useState(null);
+    const [supportedDevices, setSupportedDevices] = useState({video:false, audio: false});
     const [previousToggle, setPreviousToggle] = useState();
     const [localStream, setLocalStream] = useState(null);
 
     function toggleCamera() {
+
         if (!supportedDevices.video) {
             return;
         }
@@ -38,11 +39,11 @@ export function useMedia() {
             video: !userMedia.video,
             audio: userMedia.audio
         });
-        
-
     }
 
     function toggleMic() {
+        console.log(supportedDevices);
+
         if (!supportedDevices.audio) {
             return;
         }
@@ -59,7 +60,6 @@ export function useMedia() {
             setLocalStream(new MediaStream());
             return;
         }
-
         navigator.mediaDevices
             .getUserMedia(userMedia)
             .then(
@@ -79,13 +79,18 @@ export function useMedia() {
     useEffect(() => {
         const devices = navigator.mediaDevices.enumerateDevices()
             .then((devices) => {
+                const supported = {
+                    video: false,
+                    audio: false
+                }
                 devices.forEach((device) => {
                     if (device.kind == "videoinput") {
-                        setSupportedDevices({ video: true, ...supportedDevices });
+                        supported.video = true;
                     }
                     if (device.kind == "audioinput") {
-                        setSupportedDevices({ audio: true, ...supportedDevices });
+                        supported.audio = true;
                     }
+                    setSupportedDevices(supported);
                 })
             });
     }, []);
