@@ -79,7 +79,7 @@ export default function Room() {
     const sdpAnswer = await peerConnection.createAnswer();
     await sendRoomAnswer(roomId, sdpAnswer);
     await peerConnection.setLocalDescription(sdpAnswer);
-    setIceListeningType("ANSWER");
+    setIceListeningType("OFFER");
   }
 
   function userMediaOn() {
