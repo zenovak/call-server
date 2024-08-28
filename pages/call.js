@@ -2,12 +2,15 @@ import { Button2, IconButton } from "@components/Primitives/Button";
 import { TextInput } from "@components/Primitives/Form";
 import { ContainerPX2Y } from "@components/Primitives/Layout";
 import { TextGroupHeading, TextGroupSectionHeading } from "@components/Primitives/Typography";
+import { getRandomInt } from "@utils/math";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 
 export default function Call() {
     const {register, handleSubmit, formState: { isValid }} = useForm();
+    const router = useRouter();
 
     // test for camera toggles
     const [userMedia, setUserMedia] = useState({video: false, audio: false});
@@ -15,11 +18,11 @@ export default function Call() {
     const [localStream, setLocalStream] = useState(null);
 
     function createRoom() {
-
+        router.push(`/room/${getRandomInt(99999)}?type=offer`);
     }
 
     function joinRoom({roomId}) {
-        
+        router.push(`/room/${roomId}?type=answer`);
     }
 
     function toggleCamera() {
