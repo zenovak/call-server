@@ -47,7 +47,17 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 ## Progress Report
 
 
-### Mic not turning off issue
+### Video Audio issue
+
+If offer side does not offer video. Offer side will not receive answer side video
+despite answer side toggles video on.
+
+1. This is a unidirection issue. To fix will require using tranceiver API
+
+
+
+
+### Mic/Video toggle issues
 
 Mic turns off on offer side...
 ```
@@ -65,6 +75,19 @@ Offer side:
 
 Answer side:
 - turns off mic
+```
+
+Mic retoggle issues
+```
+Offer side:
+- turn off mic
+
+Answer side:
+- cannot hear. Expected behavior
+
+
+Offer side retoggles:
+- answer cannot hear. Unexpected behavior.
 ```
 
 
