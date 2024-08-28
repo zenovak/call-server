@@ -1,6 +1,6 @@
 import { IconButton } from "@components/Primitives/Button";
 import { ContainerP, ContainerPX, ContainerPX2Y } from "@components/Primitives/Layout";
-import { addAnswerCandidate, addOfferCandidate, useICECandidates } from "@utils/client/iceCandidate";
+import { addAnswerCandidate, addOfferCandidate, getAnswerCandidate, useICECandidates } from "@utils/client/iceCandidate";
 import { createRoomAndSendOffer, getRoomOffer, sendRoomAnswer, useSDPAnswer } from "@utils/client/room";
 import { useMedia } from "@utils/client/useMedia";
 import { useRTCPeerConnection } from "@utils/client/webRtc";
@@ -18,14 +18,26 @@ export default function Room() {
   const { localStream, userMedia, toggleCamera, toggleMic} = useMedia();
   const { peerConnection, addRemoteTrackToVideo } = useRTCPeerConnection();
   const [ startListeningSDPAnswer, setStartListeningSDPAnswer] = useState(false);
+
+  const [ isReady, setIsReady] = useState(false);
   
   // ----------------------- Signalling events -------------------------------
-  useICECandidates(roomId, iceListeningType, (iceCandiate)=>{
-    peerConnection && peerConnection.addIceCandidate(iceCandiate);
+  useICECandidates(roomId, iceListeningType, (iceCandidate)=>{
+    if (peerConnection.currentRemoteDescription == null) {
+      return;
+    }
+    console.log("called ice candidate from remote");
+    peerConnection && peerConnection.addIceCandidate(iceCandidate);
   });
 
   // -------------------------- listening for offer side ----------------------
-  useSDPAnswer(roomId, startListeningSDPAnswer, async (sdpAnswer)=>{
+  useSDPAnswer(roomId, startListeningSDPAnswer, async (sdpAnswer)=> {
+    // this must call before setting remote ICE Candidates
+    if (peerConnection.currentRemoteDescription != null) {
+      return;
+    }
+
+    setStartListeningSDPAnswer(false);
     peerConnection && await peerConnection.setRemoteDescription(sdpAnswer);
   });
 
@@ -94,10 +106,12 @@ export default function Room() {
       return;
     }
     if (type == "offer") {
+      setIsReady(true);
       await OfferIntiatorReady();
       return;
     }
     if (type == "answer") {
+      setIsReady(true);
       await AnswerSenderReady();
       return;
     }
@@ -111,7 +125,7 @@ export default function Room() {
         <div className="flex-1 relative">
           <video autoPlay playsInline id="remoteView" className="w-full h-full rounded-md bg-gray-800"/>
           <div 
-            className={startListeningSDPAnswer? "hidden" : "absolute inset-0  flex items-center justify-center"} 
+            className={isReady? "hidden" : "absolute inset-0  flex items-center justify-center"} 
           >
             <button
               className="text-gray-50 bg-gray-950 px-4 py-2 rounded-lg disabled:bg-gray-600"
@@ -124,7 +138,7 @@ export default function Room() {
           </span>
         </div>
         <div className="flex-1">
-          <video autoPlay playsInline id="localView" className="w-full h-full rounded-md bg-gray-800"/>
+          <video autoPlay playsInline muted id="localView" className="w-full h-full rounded-md bg-gray-800"/>
           <span className="block text-gray-100 px-4 py-2 font-semibold">
               You
           </span>
