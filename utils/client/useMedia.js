@@ -25,11 +25,10 @@ import { useEffect, useState } from "react";
 export function useMedia() {
     const [userMedia, setUserMedia] = useState({ video: false, audio: false });
     const [supportedDevices, setSupportedDevices] = useState({video:false, audio: false});
-    const [previousToggle, setPreviousToggle] = useState();
+    const [previousToggle, setPreviousToggle] = useState({video: false, audio: false});
     const [localStream, setLocalStream] = useState(null);
 
     function toggleCamera() {
-
         if (!supportedDevices.video) {
             return;
         }
@@ -42,8 +41,6 @@ export function useMedia() {
     }
 
     function toggleMic() {
-        console.log(supportedDevices);
-
         if (!supportedDevices.audio) {
             return;
         }
@@ -56,10 +53,20 @@ export function useMedia() {
 
     // update Device stream obj when toggle
     useEffect(() => {
+        if (!useMedia.video && previousToggle.video) {
+            // was toggled on previously now off. so stop video tracks
+            localStream.getVideoTracks()[0].stop();
+        }
+        if (!userMedia.audio && previousToggle.audio) {
+            localStream.getAudioTracks()[0].stop();
+        }
+
+        // if both are currently empty. set local stream to new plain stream
         if (!userMedia.audio && !userMedia.video) {
             setLocalStream(new MediaStream());
             return;
         }
+
         navigator.mediaDevices
             .getUserMedia(userMedia)
             .then(
