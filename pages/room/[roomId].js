@@ -99,8 +99,6 @@ export default function Room() {
   }
 
   async function onReadyClick() {
-    console.log("answer side called");
-
     if (!userMediaOn()) {
       toast.error("Make sure mic or video is On");
       return;

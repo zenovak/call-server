@@ -1,93 +1,64 @@
-import { addAnswerCandidate, addOfferCandidate, getAnswerCandidate, getOfferCandidates, useICECandidates } from "@utils/client/iceCandidate";
-import { createRoomAndSendOffer, getRoom, getRoomOffer, sendRoomAnswer, useRoom, useSDPAnswer } from "@utils/client/room";
-import { useRTCPeerConnection } from "@utils/client/webRtc";
+import { Button2, IconButton } from "@components/Primitives/Button";
+import { TextInput } from "@components/Primitives/Form";
+import { ContainerPX2Y } from "@components/Primitives/Layout";
+import { TextGroupHeading, TextGroupSectionHeading } from "@components/Primitives/Typography";
+import { getRandomInt } from "@utils/math";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 
-const testRoom = 6;
 export default function Home() {
-  const { register, handleSubmit } = useForm();
-  const { peerConnection, addRemoteTrackToVideo } = useRTCPeerConnection();
+    const {register, handleSubmit, formState: { isValid }} = useForm();
+    const router = useRouter();
 
-  const [listenType, setListenType] = useState(null);
-  const [startListeningSDPAnswer, setStartListeningSDPAnswer] = useState(false);
+    function createRoom() {
+        router.push(`/room/${getRandomInt(99999)}?type=offer`);
+    }
 
-  // Signalling server polling services. 
-  useSDPAnswer(testRoom, startListeningSDPAnswer, async (sdp) => {
-    // listens for remote answers
-    peerConnection && await peerConnection.setRemoteDescription(sdp);
-  });
-
-  // listens for ice candidites.
-  useICECandidates(testRoom, listenType, (iceCandidate) => {
-    console.log(iceCandidate);
-    peerConnection && peerConnection.addIceCandidate(iceCandidate);
-  });
-  
-  
-  async function activateCameras() {
-    const stream = await navigator.mediaDevices.getUserMedia({video: false, audio: true});
-    // const stream = navigator.mediaDevices.getUserMedia(constraints);
-    
-    stream.getTracks().forEach((track) => {
-      peerConnection.addTrack(track, stream);
-    });
-
-    const localView = document.getElementById("localView");
-    localView.srcObject = stream;
-
-    addRemoteTrackToVideo("remoteView");
-  }
+    function joinRoom({roomId}) {
+        router.push(`/room/${roomId}?type=answer`);
+    }
 
 
-  async function call() {
-    const sdpOffer = await peerConnection.createOffer();
+    return (
+        <ContainerPX2Y>
+        <div className="flex flex-col lg:flex-row gap-16 w-full">
+            <div className="flex-1">
+                <TextGroupHeading 
+                    title="Video Calls for everyone"
+                    paragraph="This is a free and open webRTC signalling server for testing and development of RealTime chat apps"
+                    className="max-w-2xl text-left flex-1 mb-8"
+                />
 
-    peerConnection.onicecandidate = (event)=> {
-      // must register ice candidate event BEFORE setting local desciption
-      event.candidate && addOfferCandidate(testRoom, event.candidate.toJSON());
-    };
-
-    await createRoomAndSendOffer(testRoom, sdpOffer);
-    await peerConnection.setLocalDescription(sdpOffer);
-
-    setListenType("ANSWER");
-    setStartListeningSDPAnswer(true); 
-  }
-
-
-  async function answerCall() {
-    setListenType("OFFER");
-
-    peerConnection.onicecandidate = (event)=> {
-      // must register ice candidate event BEFORE setting local desciption
-      event.candidate && addAnswerCandidate(testRoom, event.candidate.toJSON());
-    };
-
-    const sdpOffer = await getRoomOffer(testRoom);
-    await peerConnection.setRemoteDescription(sdpOffer);
-
-    const sdpAnswer = await peerConnection.createAnswer();
-    await sendRoomAnswer(testRoom, sdpAnswer);
-    await peerConnection.setLocalDescription(sdpAnswer);
-  }
-
-
-  return (
-    <div className="py-24 mx-auto max-w-7xl">
-      <div className=" flex gap-8 items-center justify-center mb-8">
-        {/* Optionally should also set local vid to muted here */}
-        <video id="localView" autoPlay={true} playsInline muted className="bg-black"/> 
-        <video id="remoteView" autoPlay={true} playsInline className="bg-black"/>
-      </div>
-
-      <div className="flex gap-4">
-        <input className="w-28 border" />
-        <button className="px-8 py-4 bg-blue-400" onClick={activateCameras}> Turn Cams on </button>
-        <button onClick={call}> Call</button>
-        <button onClick={answerCall}> Answer </button>
-      </div>
-    </div>
-  );
+                <div className="md:flex space-y-4 md:space-y-0 gap-8 items-center">
+                    <Button2 
+                        onClick={createRoom}
+                        className="bg-slate-600 text-gray-100 sm:hover:bg-slate-500 sm:hover:-translate-y-1 transition-transform hover:shadow">
+                        New room
+                    </Button2>
+                    <form onSubmit={handleSubmit(joinRoom)} className="flex gap-4 items-center">
+                        <TextInput
+                            required
+                            placeholder="Enter a code"
+                            name="roomId"
+                            register={register}
+                            registerProps={{required: true}}
+                            type="text"
+                        />
+                        <Button2 
+                            disabled={!isValid}
+                            type="submit"
+                            className="font-semibold hover:bg-slate-200 disabled:text-gray-200 ">
+                            Join
+                        </Button2>
+                    </form>
+                </div>
+            </div>
+            <div className="flex-1">
+                
+            </div>
+        </div>
+        </ContainerPX2Y>
+    );
 }
