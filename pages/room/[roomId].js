@@ -126,10 +126,18 @@ export default function Room() {
     <div className="bg-gray-900 w-screen h-screen">
       
       {/* Video Feed */}
-      <div className="flex max-w-screen-xl mx-auto gap-4 py-12">
+      <div className="flex flex-col md:flex-row max-w-screen-xl mx-auto gap-4 py-12">
         <div className="flex-1 relative">
           <video autoPlay playsInline id="remoteView" className="w-full h-full rounded-md bg-gray-800"/>
-          
+          <div 
+            className={isReady? "hidden" : "sm:hidden absolute inset-0 flex items-center justify-center"} 
+          >
+            <button
+              className="text-gray-50 bg-gray-950 px-4 py-2 rounded-lg disabled:bg-gray-600"
+              onClick={onReadyClick}>
+              Ready
+            </button>
+          </div>
           <span className="block text-gray-100 px-4 py-2 font-semibold">
             Guest
           </span>
@@ -144,7 +152,7 @@ export default function Room() {
       <div 
         className={isReady? 
           "hidden": 
-          "max-w-screen-xl mx-auto py-12 flex flex-col gap-8 items-center justify-center"
+          "hidden sm:flex max-w-screen-xl mx-auto py-12 flex-col gap-8 items-center justify-center"
         }
       >
         <Heading_sm 
