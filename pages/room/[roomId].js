@@ -1,5 +1,6 @@
 import { IconButton } from "@components/Primitives/Button";
 import { ContainerP, ContainerPX, ContainerPX2Y } from "@components/Primitives/Layout";
+import { Heading_lg, Heading_sm } from "@components/Primitives/Typography";
 import { addAnswerCandidate, addOfferCandidate, getAnswerCandidate, useICECandidates } from "@utils/client/iceCandidate";
 import { createRoomAndSendOffer, getRoomOffer, sendRoomAnswer, useSDPAnswer } from "@utils/client/room";
 import { useMedia } from "@utils/client/useMedia";
@@ -81,6 +82,12 @@ export default function Room() {
   async function AnswerSenderReady() {
     const sdpOffer = await getRoomOffer(roomId);
 
+    if (!sdpOffer) {
+      toast.error("Whoops. Please Wait till they are ready");
+      setIsReady(false);
+      return;
+    }
+
     peerConnection.onicecandidate = (event)=> {
       // must register ice candidate event BEFORE setting local desciption
       event.candidate && addAnswerCandidate(roomId, event.candidate.toJSON());
@@ -122,15 +129,7 @@ export default function Room() {
       <div className="flex max-w-screen-xl mx-auto gap-4 py-12">
         <div className="flex-1 relative">
           <video autoPlay playsInline id="remoteView" className="w-full h-full rounded-md bg-gray-800"/>
-          <div 
-            className={isReady? "hidden" : "absolute inset-0  flex items-center justify-center"} 
-          >
-            <button
-              className="text-gray-50 bg-gray-950 px-4 py-2 rounded-lg disabled:bg-gray-600"
-              onClick={onReadyClick}>
-              Ready
-            </button>
-          </div>
+          
           <span className="block text-gray-100 px-4 py-2 font-semibold">
             Guest
           </span>
@@ -142,7 +141,24 @@ export default function Room() {
           </span>
         </div>
       </div>
-
+      <div 
+        className={isReady? 
+          "hidden": 
+          "max-w-screen-xl mx-auto py-12 flex flex-col gap-8 items-center justify-center"
+        }
+      >
+        <Heading_sm 
+          className="max-w-3xl text-gray-200 text-2xl sm:text-3xl font-semibold" 
+          override
+          >
+          Check your mics, video, then click Ready to begin!
+        </Heading_sm>
+        <button
+          className="text-gray-50 bg-gray-950 px-4 py-2 rounded-lg disabled:bg-gray-600"
+          onClick={onReadyClick}>
+          Ready
+        </button>
+      </div>
       {/* Controls */}
       <div className="w-full fixed bottom-12">
       <ContainerP className="flex gap-4">
