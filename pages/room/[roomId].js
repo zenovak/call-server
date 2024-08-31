@@ -123,7 +123,7 @@ export default function Room() {
   }
 
   return (
-    <div className="bg-gray-900 w-screen h-screen">
+    <div className="bg-gray-900 min-h-screen">
       
       {/* Video Feed */}
       <div className="flex flex-col md:flex-row max-w-screen-xl mx-auto gap-4 py-12">

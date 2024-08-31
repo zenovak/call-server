@@ -49,7 +49,7 @@ export default function Home() {
                         <Button2 
                             disabled={!isValid}
                             type="submit"
-                            className="font-semibold hover:bg-slate-200 disabled:text-gray-200 ">
+                            className="font-semibold hover:bg-slate-200 disabled:text-gray-200 disabled:hover:bg-transparent">
                             Join
                         </Button2>
                     </form>
